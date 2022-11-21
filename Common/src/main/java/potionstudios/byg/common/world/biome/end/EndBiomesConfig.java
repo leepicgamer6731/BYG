@@ -2,6 +2,7 @@ package potionstudios.byg.common.world.biome.end;
 
 import blue.endless.jankson.api.SyntaxError;
 import com.google.gson.JsonParser;
+import com.ibm.icu.impl.ICUNotifier;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -29,8 +30,8 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndBiomeCategoryEntries, int skyLayerStartY,
-                              LayersBiomeData islandLayers, LayersBiomeData voidLayers, LayersBiomeData skyLayers) {
+public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndBiomeCategoryEntries, int skyLayerStartY, int bottomLayerStartY,
+                              LayersBiomeData islandLayers, LayersBiomeData voidLayers, LayersBiomeData skyLayers, LayersBiomeData bottomLayers) {
     public static final Supplier<Path> LEGACY_CONFIG_PATH = () -> ModPlatform.INSTANCE.configPath().resolve(BYG.MOD_ID + "-end-biomes.json");
     public static final Supplier<Path> CONFIG_PATH = () -> ModPlatform.INSTANCE.configPath().resolve("end-biomes.json5");
 
@@ -39,9 +40,11 @@ public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndB
             Codec.BOOL.fieldOf("useBYGNetherBiomeSourceInNewWorlds").forGetter(overworldBiomeConfig -> overworldBiomeConfig.forceBYGEndBiomeSource),
             Codec.BOOL.fieldOf("addAllEndBiomeCategoryEntries").forGetter(overworldBiomeConfig -> overworldBiomeConfig.addAllEndBiomeCategoryEntries),
             Codec.INT.fieldOf("skyLayerStartY").forGetter(overworldBiomeConfig -> overworldBiomeConfig.skyLayerStartY),
+            Codec.INT.fieldOf("bottomLayerStartY").forGetter(overworldBiomeConfig -> overworldBiomeConfig.bottomLayerStartY),
             LayersBiomeData.CODEC.fieldOf("islandLayerData").forGetter(overworldBiomeConfig -> overworldBiomeConfig.islandLayers),
             LayersBiomeData.CODEC.fieldOf("voidLayerData").forGetter(overworldBiomeConfig -> overworldBiomeConfig.voidLayers),
-            LayersBiomeData.CODEC.fieldOf("skyLayerData").forGetter(overworldBiomeConfig -> overworldBiomeConfig.skyLayers)
+            LayersBiomeData.CODEC.fieldOf("skyLayerData").forGetter(overworldBiomeConfig -> overworldBiomeConfig.skyLayers),
+            LayersBiomeData.CODEC.fieldOf("bottomLayerData").forGetter(overworldBiomeConfig -> overworldBiomeConfig.bottomLayers)
         ).apply(builder, EndBiomesConfig::new);
     });
 
@@ -50,15 +53,17 @@ public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndB
             Codec.BOOL.fieldOf("forceBYGEndBiomeSource").forGetter(overworldBiomeConfig -> overworldBiomeConfig.forceBYGEndBiomeSource),
             Codec.BOOL.fieldOf("addAllEndBiomeCategoryEntries").forGetter(overworldBiomeConfig -> overworldBiomeConfig.addAllEndBiomeCategoryEntries),
             Codec.INT.fieldOf("skyLayerStartY").forGetter(overworldBiomeConfig -> overworldBiomeConfig.skyLayerStartY),
+            Codec.INT.fieldOf("bottomLayerStartY").forGetter(overworldBiomeConfig -> overworldBiomeConfig.bottomLayerStartY),
             LayersBiomeData.CODEC.fieldOf("islandLayer").forGetter(overworldBiomeConfig -> overworldBiomeConfig.islandLayers),
             LayersBiomeData.CODEC.fieldOf("voidLayer").forGetter(overworldBiomeConfig -> overworldBiomeConfig.voidLayers),
-            LayersBiomeData.CODEC.fieldOf("skyLayer").forGetter(overworldBiomeConfig -> overworldBiomeConfig.skyLayers)
+            LayersBiomeData.CODEC.fieldOf("skyLayer").forGetter(overworldBiomeConfig -> overworldBiomeConfig.skyLayers),
+            LayersBiomeData.CODEC.fieldOf("bottomLayer").forGetter(overworldBiomeConfig -> overworldBiomeConfig.bottomLayers)
         ).apply(builder, EndBiomesConfig::new);
     });
 
     public static EndBiomesConfig INSTANCE = null;
 
-    public static final EndBiomesConfig DEFAULT = new EndBiomesConfig(true, true, 180, LayersBiomeData.DEFAULT_END_ISLANDS, LayersBiomeData.DEFAULT_END_VOID, LayersBiomeData.DEFAULT_END_SKY);
+    public static final EndBiomesConfig DEFAULT = new EndBiomesConfig(true, true, 180, 27, LayersBiomeData.DEFAULT_END_ISLANDS, LayersBiomeData.DEFAULT_END_VOID, LayersBiomeData.DEFAULT_END_SKY, LayersBiomeData.DEFAULT_END_BOTTOM);
 
 
     public static EndBiomesConfig getConfig() {
@@ -82,10 +87,11 @@ public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndB
             BiPredicate<Collection<ResourceKey<Biome>>, ResourceKey<Biome>> filter = (existing, added) -> !existing.contains(added);
 
             // Upgrade the config with registry values.
-            EndBiomesConfig registryUpdatedConfig = new EndBiomesConfig(INSTANCE.forceBYGEndBiomeSource(), INSTANCE.addAllEndBiomeCategoryEntries(), INSTANCE.skyLayerStartY(),
+            EndBiomesConfig registryUpdatedConfig = new EndBiomesConfig(INSTANCE.forceBYGEndBiomeSource(), INSTANCE.addAllEndBiomeCategoryEntries(), INSTANCE.skyLayerStartY(), INSTANCE.bottomLayerStartY(),
                 new LayersBiomeData(BYGUtil.combineWeightedRandomLists(filter, INSTANCE.islandLayers().biomeWeights(), registryDefaults), INSTANCE.islandLayers().biomeSize()),
                 new LayersBiomeData(INSTANCE.voidLayers().biomeWeights(), INSTANCE.voidLayers().biomeSize()),
-                new LayersBiomeData(INSTANCE.skyLayers().biomeWeights(), INSTANCE.skyLayers().biomeSize()));
+                new LayersBiomeData(INSTANCE.skyLayers().biomeWeights(), INSTANCE.skyLayers().biomeSize()),
+                new LayersBiomeData(INSTANCE.bottomLayers().biomeWeights(), INSTANCE.bottomLayers().biomeSize()));
 
             createConfig(CONFIG_PATH.get(), registryUpdatedConfig);
             INSTANCE = registryUpdatedConfig;
@@ -142,6 +148,7 @@ public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndB
             map.put("skyLayer.biomeWeights", biomeWeights);
             map.put("islandLayer.biomeWeights", biomeWeights);
             map.put("voidLayer.biomeWeights", biomeWeights);
+            map.put("bottomLayer.biomeWeights", biomeWeights);
         });
 
         String endConfigHeader = "If your settings in this file seem to have to no effect on the generation of the end, it is more than likely that another mod(s) related to the end has taken control instead, and you should user their config.";
