@@ -81,7 +81,7 @@ public abstract class BYGEndBiomeSource extends BiomeSource {
                     return this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
                 } else if (heightValue >= 0.0F) {
                     return this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
-                } else if ((heightValue >= 0.0F || heightValue > 40.0f) && y < bottomLayersStartY) {
+                } else if ((heightValue >= 0.0F || heightValue > 40.0F) && y < bottomLayersStartY) {
                     return this.bottomBiomeResolver.getNoiseBiome(x, y, z, sampler);
                 } else {
                     return heightValue < -20.0F ? this.voidBiomeResolver.getNoiseBiome(x, y, z, sampler) : this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
