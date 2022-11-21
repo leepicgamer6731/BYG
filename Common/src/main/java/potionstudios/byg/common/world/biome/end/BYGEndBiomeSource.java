@@ -30,7 +30,9 @@ public abstract class BYGEndBiomeSource extends BiomeSource {
     private final BiomeResolver islandBiomeResolver;
     private final BiomeResolver voidBiomeResolver;
     private final BiomeResolver skyBiomeResolver;
+    private final BiomeResolver bottomBiomeResolver;
     private final int skyLayersStartY;
+    private final int bottomLayersStartY;
     private final long seed;
 
     protected BYGEndBiomeSource(Registry<Biome> biomeRegistry, long seed) {
@@ -50,7 +52,9 @@ public abstract class BYGEndBiomeSource extends BiomeSource {
         this.islandBiomeResolver = getIslandBiomeResolver(biomeRegistry, seed, config.islandLayers().filter(filter));
         this.voidBiomeResolver = getVoidBiomeResolver(biomeRegistry, seed, config.voidLayers().filter(filter));
         this.skyBiomeResolver = getSkyBiomeResolver(biomeRegistry, seed, config.skyLayers().filter(filter));
+        this.bottomBiomeResolver = getBottomBiomeResolver(biomeRegistry, seed, config.bottomLayers().filter(filter));
         this.skyLayersStartY = QuartPos.fromBlock(config.skyLayerStartY());
+        this.bottomLayersStartY = QuartPos.fromBlock(config.bottomLayerStartY());
     }
 
     public abstract BiomeResolver getIslandBiomeResolver(Registry<Biome> biomeRegistry, long seed, LayersBiomeData islandLayersBiomeData);
@@ -59,6 +63,7 @@ public abstract class BYGEndBiomeSource extends BiomeSource {
 
     public abstract BiomeResolver getSkyBiomeResolver(Registry<Biome> biomeRegistry, long seed, LayersBiomeData skyLayersBiomeData);
 
+    public abstract BiomeResolver getBottomBiomeResolver(Registry<Biome> biomeRegistry, long seed, LayersBiomeData bottomLayersBiomeData);
 
     @Override
     public Holder<Biome> getNoiseBiome(int x, int y, int z, Climate.Sampler sampler) {
@@ -76,6 +81,8 @@ public abstract class BYGEndBiomeSource extends BiomeSource {
                     return this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
                 } else if (heightValue >= 0.0F) {
                     return this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
+                } else if ((heightValue >= 0.0F || heightValue > 40.0f) && y < bottomLayersStartY) {
+                    return this.bottomBiomeResolver.getNoiseBiome(x, y, z, sampler);
                 } else {
                     return heightValue < -20.0F ? this.voidBiomeResolver.getNoiseBiome(x, y, z, sampler) : this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
                 }
@@ -109,6 +116,7 @@ public abstract class BYGEndBiomeSource extends BiomeSource {
         LayersBiomeData usedIslandLayer = config.islandLayers().filter(filter);
         LayersBiomeData usedVoidLayer = config.voidLayers().filter(filter);
         LayersBiomeData usedSkyLayer = config.skyLayers().filter(filter);
+        LayersBiomeData usedBottomLayer = config.bottomLayers().filter(filter);
 
         String ignored = BYGUtil.dumpCollection(missingBiomes);
         if (!ignored.isEmpty()) {
