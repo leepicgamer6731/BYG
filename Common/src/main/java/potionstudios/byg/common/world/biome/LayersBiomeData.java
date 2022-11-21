@@ -53,6 +53,10 @@ public record LayersBiomeData(SimpleWeightedRandomList<ResourceKey<Biome>> biome
             .add(VISCAL_ISLES, 1)
             .add(Biomes.THE_END, 9)
             .build(), 3);
+    public static final LayersBiomeData DEFAULT_END_BOTTOM = new LayersBiomeData(
+            SimpleWeightedRandomList.<ResourceKey<Biome>>builder()
+                    .add(Biomes.THE_END, 5)
+                    .build(), 3);
 
     public static final LayersBiomeData DEFAULT_NETHER_MIDDLE = new LayersBiomeData(
         SimpleWeightedRandomList.<ResourceKey<Biome>>builder()
