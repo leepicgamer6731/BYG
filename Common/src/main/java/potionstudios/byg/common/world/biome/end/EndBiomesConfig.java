@@ -91,7 +91,7 @@ public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndB
                 new LayersBiomeData(BYGUtil.combineWeightedRandomLists(filter, INSTANCE.islandLayers().biomeWeights(), registryDefaults), INSTANCE.islandLayers().biomeSize()),
                 new LayersBiomeData(INSTANCE.voidLayers().biomeWeights(), INSTANCE.voidLayers().biomeSize()),
                 new LayersBiomeData(INSTANCE.skyLayers().biomeWeights(), INSTANCE.skyLayers().biomeSize()),
-                new LayersBiomeData(INSTANCE.bottomLayers().biomeWeights(), INSTANCE.bottomLayers().biomeSize()));
+                new LayersBiomeData(BYGUtil.combineWeightedRandomLists(filter, INSTANCE.bottomLayers().biomeWeights(), registryDefaults), INSTANCE.bottomLayers().biomeSize()));
 
             createConfig(CONFIG_PATH.get(), registryUpdatedConfig);
             INSTANCE = registryUpdatedConfig;
