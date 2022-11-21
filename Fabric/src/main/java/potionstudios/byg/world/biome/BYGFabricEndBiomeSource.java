@@ -47,6 +47,12 @@ public class BYGFabricEndBiomeSource extends BYGEndBiomeSource {
     }
 
     @Override
+    public BiomeResolver getBottomBiomeResolver(Registry<Biome> biomeRegistry, long seed, LayersBiomeData bottomLayersBiomeData) {
+        Area layers = createLayers(biomeRegistry, seed, bottomLayersBiomeData.biomeWeights(), bottomLayersBiomeData.biomeSize(), EndBiomesConfig.CONFIG_PATH.get());
+        return (x, y, z, sampler) -> biomeRegistry.getHolder(layers.get(x, z)).orElseThrow();
+    }
+
+    @Override
     protected Codec<? extends BiomeSource> codec() {
         return CODEC;
     }
