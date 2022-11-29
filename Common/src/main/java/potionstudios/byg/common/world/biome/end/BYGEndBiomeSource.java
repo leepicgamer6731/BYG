@@ -15,6 +15,7 @@ import potionstudios.byg.common.world.biome.LayersBiomeData;
 import potionstudios.byg.mixin.access.BiomeSourceAccess;
 import potionstudios.byg.util.BYGUtil;
 
+
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -75,14 +76,19 @@ public abstract class BYGEndBiomeSource extends BiomeSource {
             if (y > this.skyLayersStartY) {
                 return this.skyBiomeResolver.getNoiseBiome(x, y, z, sampler);
             } else {
-
                 float heightValue = getHeightValue(this.islandNoise, chunkX * 2 + 1, chunkZ * 2 + 1);
                 if (heightValue > 40.0F) {
-                    return this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
+                    if (y < bottomLayersStartY) {
+                        return this.bottomBiomeResolver.getNoiseBiome(x, y, z, sampler);
+                    } else {
+                        return this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
+                    }
                 } else if (heightValue >= 0.0F) {
+                    if (y < this.bottomLayersStartY) {
+                        return this.bottomBiomeResolver.getNoiseBiome(x, y, z, sampler);
+                    } else {
                     return this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
-                } else if ((heightValue >= 0.0F || heightValue > 40.0F) && y < bottomLayersStartY) {
-                    return this.bottomBiomeResolver.getNoiseBiome(x, y, z, sampler);
+                    }
                 } else {
                     return heightValue < -20.0F ? this.voidBiomeResolver.getNoiseBiome(x, y, z, sampler) : this.islandBiomeResolver.getNoiseBiome(x, y, z, sampler);
                 }
@@ -123,7 +129,7 @@ public abstract class BYGEndBiomeSource extends BiomeSource {
             BYG.LOGGER.warn(String.format("Config \"%s\" warned:\nThe following biome entries were ignored due to not being in this world's biome registry:\n%s", EndBiomesConfig.CONFIG_PATH.get(), ignored.toString()));
         }
 
-        List<Holder<Biome>> biomesFromBiomeData = createBiomesFromBiomeData(biomeRegistry, usedIslandLayer, usedVoidLayer, usedSkyLayer);
+        List<Holder<Biome>> biomesFromBiomeData = createBiomesFromBiomeData(biomeRegistry, usedIslandLayer, usedVoidLayer, usedSkyLayer, usedBottomLayer);
         biomesFromBiomeData.add(biomeRegistry.getHolderOrThrow(Biomes.THE_END));
         return biomesFromBiomeData;
     }
