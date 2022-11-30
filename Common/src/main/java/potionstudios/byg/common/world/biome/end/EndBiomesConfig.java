@@ -91,7 +91,7 @@ public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndB
                 new LayersBiomeData(BYGUtil.combineWeightedRandomLists(filter, INSTANCE.islandLayers().biomeWeights(), registryDefaults), INSTANCE.islandLayers().biomeSize()),
                 new LayersBiomeData(INSTANCE.voidLayers().biomeWeights(), INSTANCE.voidLayers().biomeSize()),
                 new LayersBiomeData(INSTANCE.skyLayers().biomeWeights(), INSTANCE.skyLayers().biomeSize()),
-                new LayersBiomeData(BYGUtil.combineWeightedRandomLists(filter, INSTANCE.bottomLayers().biomeWeights(), registryDefaults), INSTANCE.bottomLayers().biomeSize()));
+                new LayersBiomeData(INSTANCE.bottomLayers().biomeWeights(), INSTANCE.bottomLayers().biomeSize()));
 
             createConfig(CONFIG_PATH.get(), registryUpdatedConfig);
             INSTANCE = registryUpdatedConfig;
@@ -137,6 +137,7 @@ public record EndBiomesConfig(boolean forceBYGEndBiomeSource, boolean addAllEndB
             map.put("skyLayer", "Biomes that spawn in the Y range of \"skyLayerStartY to Dimension Max Y.");
             map.put("islandLayer", "Biomes that spawn where the large end islands/surface generate.");
             map.put("voidLayer", "Biomes that spawn where there is no ground aka void.");
+            map.put("bottomLayer", "Biomes that spawn underneath the large islands");
 
             String biomeWeights = """
                 Higher weight, means the biome in question is bound to spawn more frequently against all other biomes listed here.
